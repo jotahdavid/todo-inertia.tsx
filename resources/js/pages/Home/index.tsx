@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { router } from '@inertiajs/react';
+import todosService from '@app/services/todosService';
 
 interface HomeProps {
   todos: Todo[];
@@ -18,24 +18,25 @@ export default function Home({ todos }: HomeProps) {
     setNewTodo(event.currentTarget.value);
   }
 
-  function handleNewTodo(event: FormEvent<HTMLFormElement>) {
+  async function handleNewTodo(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (newTodo.length === 0) return;
 
-    router.post('/todos/create', {
+    await todosService.create({
       title: newTodo,
     });
 
     setNewTodo('');
   }
 
-  function handleToggleTodoComplete(todoId: number ) {
+  async function handleToggleTodoComplete(todoId: number ) {
     const todoToUpdate = todos.find((todo) => todo.id === todoId);
 
     if (!todoToUpdate) return;
 
-    router.post(`/todos/${todoId}/update-complete`, {
+    await todosService.edit({
+      id: todoId,
       is_completed: !todoToUpdate.is_completed,
     });
   }

@@ -23,25 +23,25 @@ class TodoController extends Controller
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'min:3', 'max:255'],
+            'is_completed' => ['nullable', 'boolean'],
         ]);
 
         Todo::create([
             'title' => $validated['title'],
-            'is_completed' => false,
+            'is_completed' => $validated['is_completed'] ?? false,
         ]);
 
         return to_route('todo.index');
     }
 
-    public function updateComplete(Request $request, Todo $todo): RedirectResponse
+    public function update(Request $request, Todo $todo): RedirectResponse
     {
         $validated = $request->validate([
-            'is_completed' => ['required', 'boolean'],
+            'title' => ['nullable', 'string', 'min:3', 'max:255'],
+            'is_completed' => ['nullable', 'boolean'],
         ]);
 
-        $todo->update([
-            'is_completed' => $validated['is_completed'],
-        ]);
+        $todo->update($validated);
 
         return to_route('todo.index');
     }
