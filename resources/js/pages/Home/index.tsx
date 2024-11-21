@@ -1,16 +1,18 @@
 import { FormEvent, useState } from 'react';
+import { router } from '@inertiajs/react';
 
-interface HomeProps {}
-
-interface Todo {
-  id: string;
-  title: string;
-  isCompleted: boolean;
+interface HomeProps {
+  todos: Todo[];
 }
 
-export default function Home({}: HomeProps) {
+interface Todo {
+  id: number;
+  title: string;
+  is_completed: boolean;
+}
+
+export default function Home({ todos }: HomeProps) {
   const [newTodo, setNewTodo] = useState('');
-  const [todos, setTodos] = useState<Todo[]>([]);
 
   function handleTodoInput(event: FormEvent<HTMLInputElement>) {
     setNewTodo(event.currentTarget.value);
@@ -21,16 +23,21 @@ export default function Home({}: HomeProps) {
 
     if (newTodo.length === 0) return;
 
-    setTodos((prev) => [
-      ...prev,
-      {
-        id: crypto.getRandomValues(new Uint32Array(1)).toString(),
-        title: newTodo,
-        isCompleted: false,
-      },
-    ]);
+    router.post('/todos/create', {
+      title: newTodo,
+    });
 
     setNewTodo('');
+  }
+
+  function handleToggleTodoComplete(todoId: number ) {
+    const todoToUpdate = todos.find((todo) => todo.id === todoId);
+
+    if (!todoToUpdate) return;
+
+    router.post(`/todos/${todoId}/update-complete`, {
+      is_completed: !todoToUpdate.is_completed,
+    });
   }
 
   return (
@@ -52,7 +59,12 @@ export default function Home({}: HomeProps) {
       <ul>
         {todos.map((todo) => (
           <li key={todo.id}>
-            <input type="checkbox" id={`todo.${todo.id}`}/>
+            <input
+              type="checkbox"
+              id={`todo.${todo.id}`}
+              checked={todo.is_completed}
+              onChange={() => handleToggleTodoComplete(todo.id)}
+            />
             <label htmlFor={`todo.${todo.id}`}>
               {todo.title}
             </label>
